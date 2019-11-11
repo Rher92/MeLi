@@ -34,8 +34,8 @@ class PublicationData(models.Model):
 
 
 class Attributes(models.Model):
-    id_attributes = models.CharField(max_length=30)
-    value_attributes = models.CharField(max_length=30)
+    id_attributes = models.CharField(max_length=30, null=True)
+    value_attributes = models.CharField(max_length=30, null=True)
     publication_data = models.ForeignKey(PublicationData,
         on_delete=models.CASCADE)
 

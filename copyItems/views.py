@@ -150,6 +150,7 @@ def set_or_create_sales_terms(ObjPub, data):
 def set_or_create_attributes(ObjPub, data):
     attributes = data['attributes']
     for attribute in attributes:
+        ObjAttr = None
         id_attributes=attribute['id']
         value_attributes=attribute['value_id']
         try:
@@ -158,7 +159,8 @@ def set_or_create_attributes(ObjPub, data):
         except:
             ObjAttr = Attributes(publication_data=ObjPub, \
                 id_attributes=id_attributes, value_attributes=value_attributes)
-        ObjAttr.save()    
+        if not ObjAttr is None:
+            ObjAttr.save()
 ######################################################################################
 
 
