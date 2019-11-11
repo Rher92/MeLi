@@ -40,38 +40,50 @@ def update_continue(request):
     _access_token = account.access_token
     url = 'https://api.mercadolibre.com/users/{}/items/search?access_token={}&status=active'.format(_user_id, _access_token)
 
-    r = requests.get(url)
-    if not r.status_code == requests.codes.ok:
+    response = requests.get(url)
+    if not response.status_code == requests.codes.ok:
         message = "request no valido. status code = {} - \
-            revisar credenciales de la cuenta".format(r.status_code)
+            revisar credenciales de la cuenta".format(response.status_code)
         logger.warn(message)
         return message
 
-    r = r.json()
-    items = r.get('results', None)    
-    if not items:
-        message = "Esta cuenta no posee publicaciones activas"
+    iteractions = (int(response.json()['paging']['total']) // 50) + 1
+    init = (account.offset_query // 50)
+    range_iteractions = range(init, iteractions)
+    for i in range_iteractions:
+        offset = i * 50
+        account.offset_query = offset
+        account.save()
+        url = 'https://api.mercadolibre.com/users/{}/items/search?access_token={}&status=active&offset={}'.format(_user_id, _access_token, offset)
+        logger.info(url)
+        response = requests.get(url)
+        r = response.json()
+        items = r.get('results', None)    
+        if not items:
+            message = "Esta cuenta no posee publicaciones activas"
+            logger.warn(message)
+            return message
+
+        #get item data
+        updated_pubs = []
+        for item in items:
+            url = 'https://api.mercadolibre.com/items/{0}'.format(item)
+            re = requests.get(url)
+            if not re.status_code == requests.codes.ok:
+                continue
+            data = re.json()
+
+            ObjPub = get_or_create_publication(data, account)
+            set_or_create_image(ObjPub, data)
+            set_or_create_description(ObjPub, data, item)
+            set_or_create_sales_terms(ObjPub, data)
+            set_or_create_attributes(ObjPub, data)
+            updated_pubs.append(ObjPub.title)
+            
+        message = "Cuentas con publicaciones actualizadas, por favor verificar en el admin."
         logger.warn(message)
-        return message
-
-    #get item data
-    updated_pubs = []
-    for item in items:
-        url = 'https://api.mercadolibre.com/items/{0}'.format(item)
-        re = requests.get(url)
-        if not re.status_code == requests.codes.ok:
-            continue
-        data = re.json()
-
-        ObjPub = get_or_create_publication(data, account)
-        set_or_create_image(ObjPub, data)
-        set_or_create_description(ObjPub, data, item)
-        set_or_create_sales_terms(ObjPub, data)
-        set_or_create_attributes(ObjPub, data)
-        updated_pubs.append(ObjPub.title)
-        
-    message = "Cuentas con publicaciones actualizadas, por favor verificar en el admin."
-    logger.warn(message)
+        if offset == 1000:
+            break
     return message, updated_pubs
 
 
