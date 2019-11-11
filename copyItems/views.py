@@ -82,6 +82,11 @@ def update_continue(request):
             
         message = "Cuentas con publicaciones actualizadas, por favor verificar en el admin."
         logger.warn(message)
+<<<<<<< HEAD
+=======
+        if offset == 1000:
+            break
+>>>>>>> 2b942a659080b88a95ca2a095edeaf5095328ea5
     return message, updated_pubs
 
 
