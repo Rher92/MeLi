@@ -7,6 +7,7 @@ class Account(models.Model):
     access_token = models.CharField(max_length=100)
     app_id = models.CharField(max_length=100)
     app_secret_key = models.CharField(max_length=100)
+    offset_query = models.IntegerField(default=0)
 
     def __str__(self):
         return self.name
@@ -26,7 +27,7 @@ class PublicationData(models.Model):
     video_id = models.CharField(max_length=100, null=True, blank=True)
     copy_item= models.CharField(max_length=100,
         null=True, blank=True)
-    copy = models.BooleanField(default=False)
+    copy = models.BooleanField(default=True)
 
     def __str__(self):
         return 'Account:{0} /  Publication:{1} / \
