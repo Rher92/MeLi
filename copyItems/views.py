@@ -35,7 +35,7 @@ def update(request):
 def update_continue(request):
     name = request.POST.get('account')
     account = Account.objects.get(name=name)
-    PublicationData.objects.filter(account=account).delete()
+    #PublicationData.objects.filter(account=account).delete()
     _user_id = account.user_id
     _access_token = account.access_token
     url = 'https://api.mercadolibre.com/users/{}/items/search?access_token={}&status=active'.format(_user_id, _access_token)
